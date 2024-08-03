@@ -7,7 +7,7 @@ import numpy as np
 from scipy.special import softmax
 
 
-class TwitterRobertaSentimentAnalysisModel:
+class SentimentAnalysisModel:
     """
     This class defines a sentiment prediction model based on the twitter-roberta-base-sentiment
     model from the HuggingFace hub.

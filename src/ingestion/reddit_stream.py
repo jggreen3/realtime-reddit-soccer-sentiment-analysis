@@ -8,7 +8,7 @@ import praw
 import dotenv
 
 
-from src.processing.sentiment_analysis import predict
+from src.processing.sentiment_analysis import SentimentAnalysisModel
 
 dotenv.load_dotenv()
 
@@ -27,6 +27,7 @@ class RedditContentStream:
         self.client_secret = os.getenv('REDDIT_CLIENT_SECRET')
         self.user_agent = os.getenv('REDDIT_USER_AGENT')
         self.subreddit = subreddit
+        self.model = SentimentAnalysisModel()
 
         self.reddit = self.build_service()
 
@@ -60,10 +61,10 @@ class RedditContentStream:
         for comment in self.reddit.subreddit(self.subreddit).stream.comments():
             if post_keywords:
                 if any(keyword in comment.submission.title.lower() for keyword in post_keywords):
-                    label, sentiment = predict(comment.body)
-                    print(f'{comment.body}, {label}: {sentiment}')
+                    label, sentiment = self.model.predict(comment.body)
+                    print(f'{comment.body.strip()}, {label}: {sentiment}')
             else:
-                label, sentiment = predict(comment.body)
+                label, sentiment = self.model.predict(comment.body)
                 print(f'{comment.body}, {label}: {sentiment}')
 
 
