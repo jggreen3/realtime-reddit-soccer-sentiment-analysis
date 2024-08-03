@@ -1,6 +1,6 @@
 """
-This module defines and initiates a reddit comment stream from PRAW. Based on the subbreddit and post keyword arguments,
-it matches and streams comments related to a specific topic.
+This module defines and initiates a reddit comment stream from PRAW. Based on the subbreddit 
+and post keyword arguments, it matches and streams comments related to a specific topic.
 """
 
 import os
@@ -48,25 +48,25 @@ class RedditContentStream:
         Build a comment stream from PRAW.
 
         Args:
-            post_keywords (lst[str]): List of keywords to match to the parent post for each comment. OPTIONAL FOR DEV ONLY!!!
+            post_keywords (lst[str]): List of keywords to match to the parent post for each comment.
+              OPTIONAL FOR DEV ONLY!!!
 
         Notes:
-            Currently, for a comment to count as matching, it only has to contain one keyword from the list.
-            Additionally, only the post title is checked (not selftext) because r/soccer doesn't allow selfposts.
+            Currently, for a comment to count as matching, it only has to contain one keyword 
+            from the list. Additionally, only the post title is checked (not selftext) because 
+            r/soccer doesn't allow selfposts.
         """
 
         for comment in self.reddit.subreddit(self.subreddit).stream.comments():
             if post_keywords:
                 if any(keyword in comment.submission.title.lower() for keyword in post_keywords):
-                    l, s = predict(comment.body)
-                    print(f'{comment.body}, {l}: {s}')    
-                
+                    label, sentiment = predict(comment.body)
+                    print(f'{comment.body}, {label}: {sentiment}')
             else:
-                l, s = predict(comment.body)
-                print(f'{comment.body}, {l}: {s}')
+                label, sentiment = predict(comment.body)
+                print(f'{comment.body}, {label}: {sentiment}')
 
 
 if __name__ == '__main__':
     stream = RedditContentStream()
     stream.stream_comments(post_keywords=['Argentina', 'france'])
-
