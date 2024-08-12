@@ -31,7 +31,7 @@ class SentimentAnalysisModel:
             Text (str): text to be processed
 
         Returns:
-            top_l (str): Top scoring classification. One of: Positive, negative, neutral
+            top_l (str): Top scoring classification label. One of: Positive, negative, neutral
             top_s (float): Prediction score on the range 0<score<1
         """
 
