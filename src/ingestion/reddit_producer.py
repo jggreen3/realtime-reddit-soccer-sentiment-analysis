@@ -69,6 +69,11 @@ class RedditProducer:
                                 for keyword in post_keywords):
                         continue
 
+                if post_keywords:
+                    parition_key = '-'.join(post_keywords)
+                else:
+                    parition_key = '1'
+
                 comment_json = {
                     'id': comment.id,
                     'name': comment.name,
@@ -76,14 +81,10 @@ class RedditProducer:
                     'body': comment.body,
                     'upvotes': comment.ups,
                     'downvotes': comment.downs,
-                    'timestamp': comment.created_utc
+                    'timestamp': comment.created_utc,
+                    'match_keywords': parition_key
                 }
                 print(comment_json)
-
-                if post_keywords:
-                    parition_key = '-'.join(post_keywords)
-                else:
-                    parition_key = '1'
 
                 kinesis_stream.put_record(data=comment_json, partition_key=parition_key)
                 

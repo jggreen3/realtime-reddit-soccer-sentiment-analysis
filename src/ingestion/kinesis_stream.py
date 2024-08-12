@@ -26,8 +26,10 @@ class KinesisStream:
             Metadata about the record, including its shard ID and sequence number.
         """
         try:
+            json_data = json.dumps(data).encode('utf-8')
+
             response = self.kinesis_client.put_record(
-                StreamName=self.name, Data=json.dumps(data), PartitionKey=partition_key
+                StreamName=self.name, Data=json_data, PartitionKey=partition_key
             )
             shard_id = response['ShardId']
             sequence_number = response['SequenceNumber']
