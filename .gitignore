@@ -231,3 +231,8 @@ fabric.properties
 .idea
 
 .DS_Store
+
+# Ignore lambda packages
+.zip 
+
+src/processing/package/*

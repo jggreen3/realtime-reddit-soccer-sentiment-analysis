@@ -9,7 +9,6 @@ import dotenv
 from src.ingestion.kinesis_stream import KinesisStream
 
 
-
 dotenv.load_dotenv()
 
 

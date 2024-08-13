@@ -1,7 +1,7 @@
 """
 Defines a DynamoDB table containing Reddit comment data and methods to interact with that table.
 """
-
+from decimal import Decimal
 from botocore.exceptions import ClientError
 
 class Comment:
@@ -63,8 +63,8 @@ class Comment:
             self.table.put_item(
                 Item={
                     'match_ID_timestamp': data['match_keywords'] + '_' + str(data['timestamp']),
-                    # 'sentiment_id': data['sentiment_id'],
-                    'sentiment_id': 'positive', # For dev, making records show positive
+                    'sentiment_id': data['label'],
+                    'sentiment_score': Decimal(data['score']),
                     'id': data['id'],
                     'name': data['name'],
                     'author': data['author'],
