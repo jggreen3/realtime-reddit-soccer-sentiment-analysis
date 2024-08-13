@@ -3,7 +3,8 @@ Defines a DynamoDB table containing Reddit comment data and methods to interact 
 """
 from decimal import Decimal
 from botocore.exceptions import ClientError
-from datetime import datetime
+from boto3.dynamodb.conditions import Key
+import pandas as pd
 
 class Comment:
     """
@@ -63,9 +64,7 @@ class Comment:
         try:
             self.table.put_item(
                 Item={
-                    'match_id_date': data['match_keywords'] + 
-                    '_' + datetime.today().strftime('%Y-%m-%d'),
-                    'comment_id_timestamp': data['id'] + str(int(data['timestamp'])),
+                    'match_ID_timestamp': data['match_keywords'] + '_' + str(data['timestamp']),
                     'sentiment_id': data['label'],
                     'sentiment_score': Decimal(data['score']),
                     'id': data['id'],
@@ -81,3 +80,24 @@ class Comment:
         except ClientError as err:
             print(f"Couldnt add comment to table: {err.response['Error']['Code']}, \
                       {err.response['Error']['Message']}")
+            
+
+    def query_comments(self, match_id_date) -> pd.DataFrame:
+        """
+        Queries for comments with a specific match id and date key.
+
+        Args:
+        match_id_date: The match id and date to query
+        
+        Returns:
+        Pandas dataframe containing comments which match the specified match id and date.
+        """
+
+        try:
+            response = self.table.query(KeyConditionExpression=Key("match_id_date")
+                                        .eq(match_id_date))
+        except ClientError as err:
+            print(f"Couldnt query for comments with {match_id_date}: \
+                  {err.response['Error']['Code']}, {err.response['Error']['Message']}")
+        else:
+            return pd.DataFrame(response["Items"])

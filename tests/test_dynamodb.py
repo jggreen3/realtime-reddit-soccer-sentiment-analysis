@@ -3,6 +3,7 @@ from moto import mock_aws
 import boto3
 from decimal import Decimal
 from src.processing.comment_table import Comment
+from datetime import datetime
 
 @mock_aws
 def test_add_comment():
@@ -10,16 +11,16 @@ def test_add_comment():
     Tests adding records to dynamoDB and retrieving them.
     """
     dynamodb = boto3.resource('dynamodb', region_name='us-west-1')
-    table_name = 'reddit_comment_data'
+    table_name = 'comment_data'
     
     dynamodb.create_table(
         TableName=table_name,
         KeySchema=[
-            {'AttributeName': 'match_ID_timestamp', 'KeyType': 'HASH'},
+            {'AttributeName': 'match_id_date', 'KeyType': 'HASH'},
             {'AttributeName': 'id', 'KeyType': 'RANGE'}
         ],
         AttributeDefinitions=[
-            {'AttributeName': 'match_ID_timestamp', 'AttributeType': 'S'},
+            {'AttributeName': 'match_id_date', 'AttributeType': 'S'},
             {'AttributeName': 'id', 'AttributeType': 'S'}
         ],
         ProvisionedThroughput={
@@ -49,7 +50,8 @@ def test_add_comment():
     
     # Verify that the item was added
     response = comment_table.table.get_item(
-        Key={'match_ID_timestamp': 'goal_1627846262', 'id': '12345'}
+        Key={'match_id_date': 'goal' + '_' + datetime.today().strftime('%Y-%m-%d'),
+              'id': '12345'}
     )
     print(response)
     assert 'Item' in response
