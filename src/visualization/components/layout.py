@@ -1,7 +1,9 @@
 from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
-from src.visualization.components import line_plot, ids
-from src.visualization.data.source import Comment
+# from src.visualization.components import line_plot, ids
+from . import line_plot, ids
+from data.source import Comment
+# from src.visualization.data.source import Comment
 
 
 

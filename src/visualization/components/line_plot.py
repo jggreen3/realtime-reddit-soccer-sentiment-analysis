@@ -1,9 +1,11 @@
 from dash import Dash, dcc
-from src.visualization.data.source import Comment
+# from src.visualization.data.source import Comment
+from data.source import Comment
 import plotly.express as px
 from dash.dependencies import Input, Output
 import pandas as pd
-from src.visualization.components import ids
+# from src.visualization.components import ids
+from . import ids
 import plotly.graph_objects as go
 
 
@@ -16,7 +18,7 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
     )
     def update_plot(n):
 
-        df = data.query_comments(match_id_date='1_2024-08-13')
+        df = data.query_comments(match_id_date='1_2024-08-14')
         df['date'] = pd.to_datetime(df['timestamp'].astype(int), unit='s').dt.floor('Min')
         df_count = (df.groupby(['date', 'sentiment_id'], as_index=False)['id'].count()
                     .rename(columns={'id': 'count'}))

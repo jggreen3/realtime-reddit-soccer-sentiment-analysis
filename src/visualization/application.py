@@ -1,7 +1,7 @@
 from dash import Dash
 import dash_bootstrap_components as dbc
 from components.layout import create_layout
-from src.visualization.data.source import Comment
+from data.source import Comment
 import boto3
 
 # Instantate dynamodb class and set table
