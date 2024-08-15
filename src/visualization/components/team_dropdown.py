@@ -5,7 +5,7 @@ from . import ids
 def render(app: Dash, data: Comment) -> html.Div:
     return html.Div(
         children=[
-            html.H6('Select a team',
+            html.H6('Select a team:',
                     style={'font-weight': 'bold'}),
             dcc.Dropdown(
                 id=ids.TEAM_DROPDOWN,  
