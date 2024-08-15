@@ -82,22 +82,22 @@ class Comment:
                       {err.response['Error']['Message']}")
             
 
-    def query_comments(self, match_id_date) -> pd.DataFrame:
+    def query_comments(self, team_name) -> pd.DataFrame:
         """
         Queries for comments with a specific match id and date key.
 
         Args:
-        match_id_date: The match id and date to query
+        team_name: The team name to query
         
         Returns:
         Pandas dataframe containing comments which match the specified match id and date.
         """
 
         try:
-            response = self.table.query(KeyConditionExpression=Key("match_id_date")
-                                        .eq(match_id_date))
+            response = self.table.query(KeyConditionExpression=Key("team_name")
+                                        .eq(team_name))
         except ClientError as err:
-            print(f"Couldnt query for comments with {match_id_date}: \
+            print(f"Couldnt query for comments with {team_name}: \
                   {err.response['Error']['Code']}, {err.response['Error']['Message']}")
         else:
             return pd.DataFrame(response["Items"])
