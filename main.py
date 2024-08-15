@@ -11,10 +11,10 @@ kinesis_client = boto3.client('kinesis', region_name='us-west-1')
 kinesis_stream = KinesisStream(kinesis_client=kinesis_client)
 
 # Instantiate reddit producer
-stream = RedditProducer()
+stream = RedditProducer(include_individual_subreddits=True)
 
 # Start streaming reddit comments, passing kinesis stream
-stream.stream_comments(kinesis_stream=kinesis_stream, post_keywords='')
+stream.stream_comments(kinesis_stream=kinesis_stream)
 
 # dyn_resource = boto3.resource('dynamodb')
 
@@ -33,10 +33,10 @@ stream.stream_comments(kinesis_stream=kinesis_stream, post_keywords='')
 # response = sagemaker_runtime.invoke_endpoint(
 #     EndpointName=endpoint_name, 
 #     ContentType='application/json',  # Set the content type,
-#     Body=(json.dumps({'text': 'This game is amazing!!'}))
+#     Body=(json.dumps({'text': 'This game just started'}))
 #     )
 
-# # Decodes and prints the response body:
+# # # Decodes and prints the response body:
 # decoded_response = json.loads(response['Body'].read().decode('utf-8'))
 # print(decoded_response)
 

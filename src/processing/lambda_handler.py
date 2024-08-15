@@ -15,7 +15,7 @@ def lambda_handler(event, context, sagemaker_runtime=None, comment_table=None, e
     if comment_table is None:
         dyn_resource = boto3.resource('dynamodb')
         comment_table = Comment(dyn_resource=dyn_resource)
-        comment_table.exists('comment_data')
+        comment_table.exists('soccer_comment_data')
     if endpoint_name is None:
         endpoint_name = 'huggingface-pytorch-inference-2024-08-13-17-04-51-738'
 

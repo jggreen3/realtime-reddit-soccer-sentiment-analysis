@@ -16,11 +16,11 @@ def test_add_comment():
     dynamodb.create_table(
         TableName=table_name,
         KeySchema=[
-            {'AttributeName': 'match_id_date', 'KeyType': 'HASH'},
+            {'AttributeName': 'team_name', 'KeyType': 'HASH'},
             {'AttributeName': 'id', 'KeyType': 'RANGE'}
         ],
         AttributeDefinitions=[
-            {'AttributeName': 'match_id_date', 'AttributeType': 'S'},
+            {'AttributeName': 'team_name', 'AttributeType': 'S'},
             {'AttributeName': 'id', 'AttributeType': 'S'}
         ],
         ProvisionedThroughput={
@@ -34,7 +34,7 @@ def test_add_comment():
     comment_table.exists(table_name)
     
     data = {
-        'match_keywords': 'goal',
+        'team': 'liverpool',
         'timestamp': 1627846262,
         'label': 'positive',
         'score': Decimal('0.9'),
@@ -50,7 +50,7 @@ def test_add_comment():
     
     # Verify that the item was added
     response = comment_table.table.get_item(
-        Key={'match_id_date': 'goal' + '_' + datetime.today().strftime('%Y-%m-%d'),
+        Key={'team_name': 'liverpool',
               'id': '12345'}
     )
     print(response)

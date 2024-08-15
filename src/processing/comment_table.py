@@ -63,8 +63,7 @@ class Comment:
         try:
             self.table.put_item(
                 Item={
-                    'match_id_date': data['match_keywords'] + 
-                    '_' + datetime.today().strftime('%Y-%m-%d'),
+                    'team_name': data['team'],
                     'comment_id_timestamp': data['id'] + str(int(data['timestamp'])),
                     'sentiment_id': data['label'],
                     'sentiment_score': Decimal(data['score']),
@@ -75,6 +74,7 @@ class Comment:
                     'upvotes': data['upvotes'],
                     'downvotes': data['downvotes'],
                     'timestamp': int(data['timestamp']),
+                    'subreddit': data['subreddit']
                 }
             )
 

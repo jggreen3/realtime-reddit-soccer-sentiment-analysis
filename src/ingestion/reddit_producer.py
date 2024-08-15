@@ -18,17 +18,34 @@ class RedditProducer:
     Inputs:
 
     Args: 
-        Subreddit (str): Subreddit from which to stream comments
+        include_individual_subreddits (bool): Boolean flag to decide whether to include all 
+        individual team subreddit submissions or just submissions from r/soccer:
+            True: All individual team subreddits + r/soccer
+            False: r/soccer comments onle
     """
     def __init__(self,
-                 subreddit='Soccer'):
+                 include_individual_subreddits: False):
         self.client_id = os.getenv('REDDIT_CLIENT_ID')
         self.client_secret = os.getenv('REDDIT_CLIENT_SECRET')
         self.user_agent = os.getenv('REDDIT_USER_AGENT')
-        self.subreddit = subreddit
-        # self.model = SentimentAnalysisModel()
-
         self.reddit = self.build_service()
+        self.subreddit_map = {'Gunners': 'arsenal', 'avfc': 'aston villa',
+                               'AFCBournemouth': 'bournemouth', 'Brentford': 'brentford',
+                               'BrightonHoveAlbion': 'brighton', 'chelseafc': 'chelsea',
+                               'crystalpalace': 'crystal palace', 'Everton': 'everton',
+                               'FulhamFC': 'fulham', 'IpswichTownFC': 'ipswich town',
+                               'lcfc': 'leicester city', 'LiverpoolFC': 'liverpool',
+                               'MCFC': 'manchester city', 'reddevils': 'manchester united',
+                               'nufc': 'newcastle', 'nffc': 'nottingham forest',
+                               'SaintsFC': 'southampton', 'coys': 'tottenham',
+                               'Hammers': 'west ham', 'WWFC': 'wolves'}
+
+        if include_individual_subreddits:
+            self.subreddit = '+'.join(list(self.subreddit_map.keys()) + ['Soccer'])
+        else:
+            self.subreddit = 'Soccer'
+
+
 
     def build_service(self):
         """"
@@ -43,7 +60,6 @@ class RedditProducer:
                            user_agent=self.user_agent)
 
     def stream_comments(self,
-                        post_keywords: list=None,
                         kinesis_stream: KinesisStream=None):
         """
         Build a comment stream from PRAW.
@@ -62,35 +78,40 @@ class RedditProducer:
         """
 
         for comment in self.reddit.subreddit(self.subreddit).stream.comments(skip_existing=True):
+
+
             try:
-                if post_keywords:
-                    if not any(keyword in comment.submission.title.lower()
-                                for keyword in post_keywords):
+                if comment.subreddit.display_name == 'soccer': 
+                    teams = [name for name in self.subreddit_map.values() if 
+                             name in comment.submission.title.lower()]
+                    if len(teams) == 0:
                         continue
-
-                if post_keywords:
-                    parition_key = '-'.join(post_keywords)
                 else:
-                    parition_key = '1'
+                    teams = [self.subreddit_map[comment.subreddit.display_name]]
 
-                comment_json = {
-                    'id': comment.id,
-                    'name': comment.name,
-                    'author': comment.author.name,
-                    'body': comment.body,
-                    'upvotes': comment.ups,
-                    'downvotes': comment.downs,
-                    'timestamp': comment.created_utc,
-                    'match_keywords': parition_key
-                }
-                print(comment_json)
+                subreddit = comment.subreddit.display_name
 
-                kinesis_stream.put_record(data=comment_json, partition_key=parition_key)
-                
-                
+                # Loop through teams in case multiple team names match a comment from r/soccer
+                for team in teams:
+                    comment_json = {
+                        'id': comment.id,
+                        'name': comment.name,
+                        'author': comment.author.name,
+                        'body': comment.body,
+                        'upvotes': comment.ups,
+                        'downvotes': comment.downs,
+                        'timestamp': comment.created_utc,
+                        'subreddit': subreddit,
+                        'team': team
+                    }
+                    print(comment_json)
+
+                    kinesis_stream.put_record(data=comment_json, partition_key=team)
+
+
             except Exception as e:
-                print(f'An error occured: {str(e)}')
+                print(f'An error occured: {e}')
 
 if __name__ == '__main__':
-    stream = RedditProducer()
-    stream.stream_comments(post_keywords=None)
+    stream = RedditProducer(include_individual_subreddits=True)
+    stream.stream_comments()
