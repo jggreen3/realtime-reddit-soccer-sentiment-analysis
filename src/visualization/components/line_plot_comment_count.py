@@ -43,7 +43,7 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
         fig.update_xaxes(title='Date and Time')
 
         fig.update_layout(margin=dict(l=10, r=10, t=10, b=10))
-        
+
         return fig
 
     return dcc.Graph(id=ids.LINE_PLOT_COMMENT_COUNT,

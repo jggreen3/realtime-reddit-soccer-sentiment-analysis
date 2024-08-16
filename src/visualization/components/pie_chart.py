@@ -37,7 +37,7 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
         
         fig.update_traces(textposition='inside', textinfo='percent+label')
         fig.update_layout(showlegend=False)
-        fig.update_layout(margin=dict(l=10, r=10, t=10, b=10))  # Adjust margins within the plot
+        fig.update_layout(margin=dict(l=10, r=10, t=10, b=10))
 
         
         return fig

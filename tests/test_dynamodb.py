@@ -44,6 +44,7 @@ def test_add_comment():
         'body': 'This is a test comment',
         'upvotes': 10,
         'downvotes': 0,
+        'subreddit': 'test'
     }
     
     comment_table.add_comment(data=data)

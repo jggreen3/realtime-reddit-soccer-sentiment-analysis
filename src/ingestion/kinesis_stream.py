@@ -2,7 +2,12 @@
 stream"""
 
 import json
+import logging
+import dotenv
+import os
 
+logger = logging.getLogger(__name__)
+dotenv.load_dotenv()
 
 class KinesisStream:
     """
@@ -10,10 +15,10 @@ class KinesisStream:
     """
 
     def __init__(self, kinesis_client) -> None:
-        self.name = 'reddit-sentiment-stream'
+        self.name = os.getenv('KINESIS_STREAM_NAME')
         self.kinesis_client = kinesis_client
 
-    def put_record(self, data, partition_key):
+    def put_record(self, data: dict, partition_key: str) -> dict:
         """
         Puts data into the stream. The data is formatted as JSON before it is passed
         to the stream.
@@ -35,14 +40,15 @@ class KinesisStream:
             sequence_number = response['SequenceNumber']
             print(f"Put record in stream {self.name} on shard {shard_id} \
                   with sequence number {sequence_number}.")
-        except:
-            print(f"Couldn't put record in stream {self.name}")
+        except Exception as e:
+            logger.error("Couldn't put record in stream %s. Error: %s", self.name, e)
             raise
 
         return response
 
 
-    def get_records(self, shard_id, iterator_type='TRIM_HORIZON', limit=10):
+    def get_records(self, shard_id: str, iterator_type: str = 'TRIM_HORIZON',
+                     limit: int =10) -> list[dict]:
         """
         Gets records from the specified shard in the stream.
 
@@ -67,11 +73,8 @@ class KinesisStream:
             )
 
             records = response['Records']
-            for record in records:
-                print(f"Record: {json.loads(record['Data'])}")
-
-            return records
+            return [json.loads(record['Data']) for record in records]
 
         except Exception as e:
-            print(f"Couldn't get records from shard {shard_id}. Error: {e}")
+            logger.error("Couldn't get records from shard %s. Error: %s", shard_id, e)
             raise
