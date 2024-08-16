@@ -1,13 +1,14 @@
+"""Defines the layout for a dash application."""
+
 from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
-# from src.visualization.components import line_plot, ids
-from . import (line_plot, ids, team_dropdown, pie_chart, line_plot_comment_count, 
-               time_window_buttons, plot_type_buttons)
 from data.source import Comment
-# from src.visualization.data.source import Comment
+from . import (line_plot, ids, team_dropdown, pie_chart, line_plot_comment_count,
+               time_window_buttons, plot_type_buttons)
 
 
-def generate_control_card(app: Dash, data: Comment):
+
+def generate_control_card(app: Dash, data: Comment) -> html.Div:
     """
     Generates a Div component containing dashboard information and plot controls.
 
@@ -15,7 +16,7 @@ def generate_control_card(app: Dash, data: Comment):
         app: Dash appplication
         data: Comment object encapsulating database interaction methods
     Returns:
-        html Div
+        html Div: A Div containing the control card
     """
     return html.Div(
         children=[
@@ -42,7 +43,6 @@ def generate_control_card(app: Dash, data: Comment):
                         html.Div(plot_type_buttons.render(app, data)),
                         html.Br(),
                         html.Div(time_window_buttons.render(app, data)),
-                        
                     ]
                 ),
                 style={'border': 'none', 'backgroundColor': '#f8f9fa'}
@@ -51,14 +51,14 @@ def generate_control_card(app: Dash, data: Comment):
         style={'margin-bottom': '20px'}
     )
 
-def generate_line_plot(app: Dash, data: Comment):
+def generate_line_plot(app: Dash, data: Comment) -> html.Div:
     """
     Generates a Div component containing a line plot of comment sentiment over time.
     Args:
         app: Dash appplication
         data: Comment object encapsulating database interaction methods
     Returns:
-        html Div
+        html Div: A Div containing the line plot
     """
     return html.Div(
         children=[
@@ -75,7 +75,7 @@ def generate_line_plot(app: Dash, data: Comment):
         ]
     )
 
-def generate_pie_chart(app: Dash, data: Comment):
+def generate_pie_chart(app: Dash, data: Comment) -> html.Div:
     """
     Generates a Div component containing a pie chart.
 
@@ -83,7 +83,7 @@ def generate_pie_chart(app: Dash, data: Comment):
         app: Dash appplication
         data: Comment object encapsulating database interaction methods
     Returns:
-        html Div
+        html Div: A Div contianing the pie chart
     """
     return html.Div(
         children=[
@@ -100,7 +100,7 @@ def generate_pie_chart(app: Dash, data: Comment):
         ]
     )
 
-def generate_line_plot_comment_count(app: Dash, data: Comment):
+def generate_line_plot_comment_count(app: Dash, data: Comment) -> html.Div:
     """
     Generates a Div component containing a line plot showing comment volume over time.
 
@@ -108,7 +108,7 @@ def generate_line_plot_comment_count(app: Dash, data: Comment):
         app: Dash appplication
         data: Comment object encapsulating database interaction methods
     Returns:
-        html Div
+        html Div: A Div containing the comment volume line plot
     """
     return html.Div(
         children=[
@@ -133,11 +133,11 @@ def create_layout(app: Dash, data: Comment) -> html.Div:
         app: Dash appplication
         data: Comment object encapsulating database interaction methods
     Returns:
-        html Div
+        html Div: The main div containing the dashboard layout
     """
     return html.Div(
         className="app-div",
-        style={'display': 'flex', 'flexDirection': 'column', 'height': '100vh', 
+        style={'display': 'flex', 'flexDirection': 'column', 'height': '100vh',
                'overflow-x': 'hidden'},
         children=[
             dbc.Container(
@@ -159,7 +159,7 @@ def create_layout(app: Dash, data: Comment) -> html.Div:
                         dbc.Col(
                             generate_control_card(app, data),
                             xs=12, md=3,  # Full width on small screens, 1/3 width on medium+
-                            style={'padding': '0 10px', 'margin-bottom': '0px', 
+                            style={'padding': '0 10px', 'margin-bottom': '0px',
                                    'background-color': 'rgb(248, 249, 250)'}
                         ),
                         dbc.Col(

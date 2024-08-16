@@ -1,10 +1,11 @@
 """This module defines a Kinesis stream, providing methods to get/put records in the
 stream"""
 
+import os
 import json
 import logging
 import dotenv
-import os
+
 
 logger = logging.getLogger(__name__)
 dotenv.load_dotenv()
@@ -38,8 +39,8 @@ class KinesisStream:
             )
             shard_id = response['ShardId']
             sequence_number = response['SequenceNumber']
-            print(f"Put record in stream {self.name} on shard {shard_id} \
-                  with sequence number {sequence_number}.")
+            logger.info("Put record in stream %s on shard %s with sequence number %s",
+                        self.name, shard_id, sequence_number)
         except Exception as e:
             logger.error("Couldn't put record in stream %s. Error: %s", self.name, e)
             raise
