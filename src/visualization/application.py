@@ -4,11 +4,14 @@ Defines a Dash application including the layout, server config, and data source.
 
 import os
 import logging
+import dotenv
 from dash import Dash
 import dash_bootstrap_components as dbc
 from components.layout import create_layout
 from data.source import Comment
 import boto3
+
+dotenv.load_dotenv()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -41,7 +44,7 @@ def create_app() -> Dash:
     comment_table = initialize_dynamodb()
     _app = Dash(external_stylesheets=[dbc.themes.LITERA])
     _app.title = 'Realtime Soccer Sentiment'
-    _app.layout = create_layout(app=app, data=comment_table)
+    _app.layout = create_layout(app=_app, data=comment_table)
     return _app
 
 app = create_app()
