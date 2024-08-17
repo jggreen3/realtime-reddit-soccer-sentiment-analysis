@@ -40,6 +40,13 @@ season progresses. By analyzing the sentiment in Reddit comments, this project p
 into how public opinion shifts overtime, influenced by match results, player performance, and team
 standings.
 
+A sample of what the dashboard looks like running is shown below:
+
+<br>
+<div align="center">
+    <img src="screenshots/dashboard.png" alt="dashboard" >
+</div>
+
 ### Methodology:
 #### Data Collection:
 <ul>
