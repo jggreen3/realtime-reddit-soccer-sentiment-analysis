@@ -27,7 +27,7 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
         df = data.query_comments(team_name=selected_team)
 
         df['date'] = (pd.to_datetime(df['timestamp'].astype(int), unit='s').dt.tz_localize('UTC')
-                      .dt.tz_convert('US/Pacific').dt.floor('Min')).dt.tz_localize(None)
+                      .dt.tz_convert('US/Pacific').dt.floor('10Min')).dt.tz_localize(None)
         
         df = df.loc[df['date'] > datetime.datetime.now() - pd.to_timedelta(selected_time_window)]
 

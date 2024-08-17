@@ -55,7 +55,7 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
                 pd.to_datetime(df['timestamp'].astype(int), unit='s')
                 .dt.tz_localize('UTC')
                 .dt.tz_convert('US/Pacific')
-                .dt.floor('Min')
+                .dt.floor('10Min')
                 .dt.tz_localize(None)
             )
 
