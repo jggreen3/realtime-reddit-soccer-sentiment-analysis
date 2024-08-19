@@ -234,5 +234,3 @@ fabric.properties
 
 # Ignore lambda packages
 .zip 
-
-src/processing/package/*
