@@ -230,8 +230,13 @@ pytest tests/
 ```
 
 ## Roadmap
-- [] Extend sentiment analysis with more advanced analytics, such as sentiment correlation with
-match outcomes or player performance.
-- [] Incorporate additional data sources like Twitter
-- [] Incorporate a database caching layer with Redis to improve efficiency of queries
 
+- Extend sentiment analysis with more advanced analytics, such as sentiment correlation with
+match outcomes or player performance.
+- Incorporate additional data sources like Twitter
+- Incorporate a database caching layer with Redis to improve efficiency of queries
+
+## Contributing
+
+Contributions are welcome! If you find any bugs or have suggestions for new features, feel free to 
+open an issue or submit a pull request.
