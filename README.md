@@ -226,5 +226,12 @@ moto to mock-test aws components. The tests cover the following modules:
 To run the tests, execute the following command from the project root directory:
 
 ```
-pytest /tests
+pytest tests/
 ```
+
+## Roadmap
+- [] Extend sentiment analysis with more advanced analytics, such as sentiment correlation with
+match outcomes or player performance.
+- [] Incorporate additional data sources like Twitter
+- [] Incorporate a database caching layer with Redis to improve efficiency of queries
+
