@@ -24,9 +24,6 @@ comments. The dashboard is powered by a scalable AWS backend and a dynamic front
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -193,6 +190,8 @@ the aws console following model deployment, and the dynamodb table name was set 
     ```
 
 7. Start the Kinesis Stream and Run the Dash Application
+    
+    Navigate back to the project root directory, then:
 
     To start the Kinesis stream:
     ```
@@ -202,9 +201,30 @@ the aws console following model deployment, and the dynamodb table name was set 
     Finally, to run the Dash application:
 
     ```
-    python3 app.py
+    python3 src/visualization/application.py
     ```
     Open your web browswer and navigate to `http://localhost:8050` to view the dashboard.
 
+## Usage
 
+Once the application and Kinesis stream are running, navigating to `http://localhost:8050` in a 
+web browser will show the dashboard. Using the controls on the left side, you can filter by team,
+adjust the time window, or adjust the visualization properties. 
 
+### Testing:
+
+Once the application is set up, it's reccomended to run the included unit tests. These tests use
+moto to mock-test aws components. The tests cover the following modules:
+
+<ul>
+    <li><strong>Sagemaker:</strong> Tests to verify that the model is correctly invoked and returns
+    expected sentiment scores
+    <li><strong>Data Processing Logic:</strong> Tests verify that data is ingested and processed 
+    correctly, checking data transformations and storage.
+</ul>
+
+To run the tests, execute the following command from the project root directory:
+
+```
+pytest /tests
+```
