@@ -1,17 +1,30 @@
+"""
+Defines a pie chart showing sentiment distribution.
+"""
+
+import logging
+from typing import Optional
 import plotly.graph_objects as go
+import plotly.express as px
 from dash import Dash, dcc
 from dash.dependencies import Input, Output
-import plotly.express as px
 import pandas as pd
-# from src.visualization.data.source import Comment
 from data.source import Comment
-
-# from src.visualization.components import ids
 from . import ids
 
-
+logger = logging.getLogger(__name__)
 
 def render(app: Dash, data: Comment) -> dcc.Graph:
+    """
+    Generates a Graph object containing a pie chart of comment sentiment distribution.
+
+    Args:
+        app: Dash application.
+        data: Comment object encapsulating database interaction methods.
+
+    Returns:
+        dcc.Graph: Graph object containing pie chart information.
+    """
     initial_figure = go.Figure()
 
     @app.callback(
@@ -19,33 +32,43 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
         Input(ids.INTERVAL_COMPONENT, 'n_intervals'),
         Input(ids.TEAM_DROPDOWN, 'value')
     )
-    def update_plot(n, selected_team):
+    def update_plot(n: int, selected_team: Optional[str]) -> go.Figure:
+        """
+        Updates the pie chart based on the selected team.
 
-        df = data.query_comments(team_name=selected_team)
+        Args:
+            n: Interval count (unused).
+            selected_team: The team selected from the dropdown.
 
-        df_plot = pd.DataFrame(df['sentiment_id'].value_counts(normalize=True)).reset_index()
+        Returns:
+            go.Figure: Updated pie chart figure.
+        """
+        try:
+            df = data.query_comments(team_name=selected_team)
 
-        fig = px.pie(df_plot,
-                    values='proportion',
-                    names='sentiment_id',
-                    template='simple_white',
-                    color='sentiment_id',
-                    color_discrete_map={'positive': '#98df8a',
-                                        'negative': '#e37777', 
-                                        'neutral': '#b0b0b0'})
+            df_plot = pd.DataFrame(df['sentiment_id'].value_counts(normalize=True)).reset_index()
+            df_plot.columns = ['sentiment_id', 'proportion']
 
-        
-        fig.update_traces(textposition='inside', textinfo='percent+label')
-        fig.update_layout(showlegend=False)
-        fig.update_layout(margin=dict(l=10, r=10, t=10, b=10))
+            fig = px.pie(
+                df_plot,
+                values='proportion',
+                names='sentiment_id',
+                template='simple_white',
+                color='sentiment_id',
+                color_discrete_map={
+                    'positive': '#98df8a',
+                    'negative': '#e37777',
+                    'neutral': '#b0b0b0'
+                }
+            )
 
-        
-        return fig
+            fig.update_traces(textposition='inside', textinfo='percent+label')
+            fig.update_layout(showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
 
-    return dcc.Graph(id=ids.PIE_CHART,
-                    figure=initial_figure,
-                    )
+            return fig
 
+        except Exception as e:
+            logger.error("Error updating pie chart: %s", e)
+            return go.Figure()
 
-
-
+    return dcc.Graph(id=ids.PIE_CHART, figure=initial_figure)
