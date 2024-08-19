@@ -11,7 +11,6 @@ comments. The dashboard is powered by a scalable AWS backend and a dynamic front
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
-        <li><a href="#methodology">Methodology</a></li>
         <li><a href="#architecture">Architecture</a></li>
       </ul>
     </li>
@@ -89,4 +88,123 @@ The diagram below shows a high-level overview of the cloud architecture for this
 </div>
 
 
-## Setup Instructions:
+## Getting Started:
+
+### Prerequisistes:
+
+Before you begin, ensure you have the following requirements:
+
+<ul>
+    <li><strong>Python 3.8+ </strong></li>
+    <li><strong>An AWS Account</strong></li>
+    <li><strong>The AWS CLI Installed</strong></li>
+    <li><strong>A Reddit developer account and PRAW credentials</strong></li>
+</ul>
+
+### Installation:
+
+1. Clone the repository:
+    ```shell
+    git clone https://github.com/John-The-Fisherman/realtime-reddit-soccer-sentiment-analysis.git
+    cd realtime-reddit-soccer-sentiment-analysis
+    ```
+
+2. Install dependencies (Reccomended to do this in a virtual environment of your choice):
+    ```shell
+    pip install -r requirements.txt
+    ```
+
+3. Configure AWS Credentials:
+<br>
+
+    Ensure that your AWS credentials are configured locally. You can set up credentials with the aws
+    cli.
+    ```
+    aws configure
+    ```
+
+4. Create an IAM role for lambda:
+    <br>
+
+    In the AWS IAM console, create a role with the following policies attached:
+    <ul>
+        <li> AmazonDynamoDBFullAccess
+        <li> AmazonSageMakerFullAccess
+        <li> AWSLambdaKinesisExecutionRole
+    </ul>
+
+    These permissions will allow the lambda function to interact with all of the required infastructure.
+
+5. Deploy AWS Resources:
+
+    You can automate the deployment of the Lambda Function, SageMaker Endpoint, and Kinesis Stream
+    using the provided shell/python deployment scripts. 
+
+    First, change to the deployment_scripts directory
+
+    ```
+    cd deployment_scripts
+    ```
+<ul>
+    <li><strong> Deploy Lambda Function:</strong></li>
+
+```shell
+./deploy_lambda.sh my_lambda_function arn:aws:iam::123456789/my-role-name 
+```
+Here the first argument passed to the script is the desired lambda function name and the second
+is the arn number for the Lambda IAM role created in step 4.
+
+<li><strong>Deploy Sagemaker Endpoint:</strong></li>
+
+```
+python3 deploy_model.py
+```
+This script will take about 5 minutes to run
+
+<li><strong>Deploy Kinesis Stream:</strong></li>
+
+```shell
+./deploy_kinesis.sh my_stream_name
+```
+Here the argument passed is the desired name for the kinesis stream being created
+
+<li><strong>Deploy DynamoDB Table:</strong></li>
+
+```shell
+./deploy_dynamodb.sh my_table_name
+```
+Here, the argument passed is the desired name for the dynamodb table being created.
+
+</ul>
+
+6. Set environmental Variables:
+Create a `.env` file and add the necessary configuration values. The reddit client and secret ids
+as well as the user agent come from PRAW configurations, the sagemaker endpoint can be found in
+the aws console following model deployment, and the dynamodb table name was set in step 4.
+    ```
+    REDDIT_CLIENT_ID = your_client_id
+    REDDIT_CLIENT_SECRET = your_secret_id
+    REDDIT_USER_AGENT = your_user_agent
+    KINESIS_STREAM_NAME = your_stream_name
+    DYNAMODB_TABLE_NAME = your_table_name
+    AWS_REGION = your_region
+    SAGEMAKER_ENDPOINT_NAME = your_endpoint_name
+    MODEL_NAME = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
+    ```
+
+7. Start the Kinesis Stream and Run the Dash Application
+
+    To start the Kinesis stream:
+    ```
+    python3 main.py
+    ```
+
+    Finally, to run the Dash application:
+
+    ```
+    python3 app.py
+    ```
+    Open your web browswer and navigate to `http://localhost:8050` to view the dashboard.
+
+
+
