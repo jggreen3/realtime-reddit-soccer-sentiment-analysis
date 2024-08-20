@@ -112,7 +112,6 @@ Before you begin, ensure you have the following requirements:
     ```
 
 3. Configure AWS Credentials:
-<br>
 
     Ensure that your AWS credentials are configured locally. You can set up credentials with the aws
     cli.
