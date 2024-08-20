@@ -116,11 +116,12 @@ Before you begin, ensure you have the following requirements:
 
     Ensure that your AWS credentials are configured locally. You can set up credentials with the aws
     cli.
+   
     ```
     aws configure
     ```
 
-4. Create an IAM role for lambda:
+5. Create an IAM role for lambda:
     <br>
 
     In the AWS IAM console, create a role with the following policies attached:
@@ -132,7 +133,7 @@ Before you begin, ensure you have the following requirements:
 
     These permissions will allow the lambda function to interact with all of the required infastructure.
 
-5. Deploy AWS Resources:
+6. Deploy AWS Resources:
 
     You can automate the deployment of the Lambda Function, SageMaker Endpoint, and Kinesis Stream
     using the provided shell/python deployment scripts. 
