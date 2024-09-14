@@ -102,7 +102,7 @@ Before you begin, ensure you have the following requirements:
 
 1. Clone the repository:
     ```shell
-    git clone https://github.com/John-The-Fisherman/realtime-reddit-soccer-sentiment-analysis.git
+    git clone https://github.com/jggreen3/realtime-reddit-soccer-sentiment-analysis.git
     cd realtime-reddit-soccer-sentiment-analysis
     ```
 
