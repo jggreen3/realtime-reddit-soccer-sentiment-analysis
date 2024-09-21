@@ -22,6 +22,6 @@ zip -g $ZIP_FILE comment_table.py
 
 # Step 4: Deploy the Lambda function
 aws lambda create-function --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$ZIP_FILE \
-    --handler lambda_handler.lambda_handler --runtime python3.8 --role $ROLE
+    --handler lambda_handler.lambda_handler --runtime python3.12 --role $ROLE
 
 echo "Lambda function deployed successfully."

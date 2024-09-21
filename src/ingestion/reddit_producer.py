@@ -9,6 +9,7 @@ from typing import Optional
 import praw
 import dotenv
 from src.ingestion.kinesis_stream import KinesisStream
+# from kinesis_stream import KinesisStream
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ class RedditProducer:
 
                 for team in teams:
                     comment_json = self.build_comment_json(comment, team)
-                    logger.info(comment_json)
+                    logger.info('Processing comment: %s', comment_json)
 
                     if kinesis_stream:
                         kinesis_stream.put_record(data=comment_json, partition_key=team)

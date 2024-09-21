@@ -6,12 +6,10 @@ import os
 from typing import Any, Optional
 import base64
 import boto3
-import dotenv
-from src.processing.comment_table import Comment
+from comment_table import Comment
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-dotenv.load_dotenv()
 
 def initialize_resources(sagemaker_runtime=None, comment_table=None, endpoint_name=None) -> tuple:
     """Initializes the required AWS resources if not provided."""
