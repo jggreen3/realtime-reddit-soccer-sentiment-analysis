@@ -1,98 +1,116 @@
-"""
-Defines a DynamoDB table containing Reddit comment data and methods to interact with that table.
-"""
+"""Defines a redis cache containing Reddit comment data and methods to interact with it."""
+
 import logging
-from decimal import Decimal
-from botocore.exceptions import ClientError
-from boto3.dynamodb.conditions import Key
+from urllib.parse import ParseResult, urlencode, urlunparse
+from typing import Tuple, Union
+import json
+import os
+import redis
+import redis.exceptions
+import botocore.session
+from botocore.model import ServiceId
+from botocore.signers import RequestSigner
+from cachetools import TTLCache, cached
 import pandas as pd
 
+
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
+class ElastiCacheIAMProvider(redis.CredentialProvider):
+    """Class which acts as a wrapper for elasticache IAM operations."""
+    def __init__(self, user, cache_name, is_serverless=True, region="us-west-1"):
+        self.user = user
+        self.cache_name = cache_name
+        self.is_serverless = is_serverless
+        self.region = region
+
+        session = botocore.session.get_session()
+        self.request_signer = RequestSigner(
+            ServiceId("elasticache"),
+            self.region,
+            "elasticache",
+            "v4",
+            session.get_credentials(),
+            session.get_component("event_emitter"),
+        )
+
+    # Generated IAM tokens are valid for 15 minutes
+    @cached(cache=TTLCache(maxsize=128, ttl=900))
+    def get_credentials(self) -> Union[Tuple[str], Tuple[str, str]]:
+        query_params = {"Action": "connect", "User": self.user}
+        if self.is_serverless:
+            query_params["ResourceType"] = "ServerlessCache"
+        url = urlunparse(
+            ParseResult(
+                scheme="https",
+                netloc=self.cache_name,
+                path="/",
+                query=urlencode(query_params),
+                params="",
+                fragment="",
+            )
+        )
+        signed_url = self.request_signer.generate_presigned_url(
+            {"method": "GET", "url": url, "body": {}, "headers": {}, "context": {}},
+            operation_name="connect",
+            expires_in=900,
+            region_name=self.region,
+        )
+        # RequestSigner only seems to work if the URL has a protocol, but
+        # Elasticache only accepts the URL without a protocol
+        # So strip it off the signed URL before returning
+        return (self.user, signed_url.removeprefix("https://"))
+
+
 
 class Comment:
-    """
-    Encapsulates a DynamoDB table of comment data.
-    """
+    """Encapsulates a Redis cache of comment data"""
 
-    def __init__(self, dyn_resource):
+    def __init__(self):
+        self.redis_client = self.create_redis_client()
+
+    def create_redis_client(self):
+        """Creates a redis client using IAM credentials."""
+
+        if os.getenv('DEBUG').lower() == 'true':
+            # Local redis cache
+            redis_client = redis.Redis(host='localhost', port=6379)
+        else:
+            # Elasticache
+            username = os.getenv('ELASTICACHE_USERNAME')
+            cache_name = os.getenv('CACHE_NAME')
+            elasticache_endpoint = os.getenv('ELASTICACHE_ENDPOINT')
+            creds_provider = ElastiCacheIAMProvider(user=username, cache_name=cache_name,
+                                                is_serverless=True)
+
+            redis_client = redis.Redis(host=elasticache_endpoint, port=6379,
+                                        credential_provider=creds_provider, ssl=True,
+                                        ssl_cert_reqs="none")
+        return redis_client
+
+    def query_comments(self, team_name:str, start_time:int, end_time:int) -> pd.DataFrame:
         """
-        Args:
-            dyn_resource: A Boto3 DynamoDB resource.
-        """
-
-        self.dyn_resource = dyn_resource
-        self.table = None  # Table variable is set during call to exists.
-
-    def exists(self, table_name: str) -> bool:
-        """
-        Determines whether or not a table exists. If the table exists, stores it as an instance
-        variable defining the table to be used.
-
-        Args:
-            table_name: The name of the table to check.
-
-        Returns:
-            True when the table exists, False otherwise.
-        """
-        try:
-            table = self.dyn_resource.Table(table_name)
-            table.load()
-            exists = True
-        except ClientError as err:
-            if err.response["Error"]["Code"] == "ResourceNotFoundException":
-                exists = False
-            else:
-                logger.error("Couldn't check for existence: %s, %s",
-                             err.response['Error']['Code'], err.response['Error']['Message'])
-                raise
-
-        self.table = table
-        return exists
-
-    def add_comment(self, data: dict) -> None:
-        """
-        Adds a comment record to the table.
-        
-        Args:
-            data: JSON data containing comment information.
-        """
-        try:
-            self.table.put_item(
-                Item={
-                    'match_ID_timestamp': data['match_keywords'] + '_' + str(data['timestamp']),
-                    'sentiment_id': data['label'],
-                    'sentiment_score': Decimal(data['score']),
-                    'id': data['id'],
-                    'name': data['name'],
-                    'author': data['author'],
-                    'body': data['body'],
-                    'upvotes': data['upvotes'],
-                    'downvotes': data['downvotes'],
-                    'timestamp': int(data['timestamp']),
-                }
-            )
-        except ClientError as err:
-            logger.error("Couldn't add comment to table: %s, %s",
-                         err.response['Error']['Code'], err.response['Error']['Message'])
-            raise
-
-    def query_comments(self, team_name: str) -> pd.DataFrame:
-        """
-        Queries for comments with a specific team name.
+        Queries for comments by team name and timeframe.
 
         Args:
-            team_name: The team name to query.
+            team_name: The name of the team to query.
+            start_time: The start of the time window to get comments from.
+            end_time: The end of the time window to get comments from.
         
         Returns:
-            pd.DataFrame: DataFrame containing comments that match the specified team name.
+            pd.DataFrame: Dataframe containing the result of the query.
         """
         try:
-            response = self.table.query(
-                KeyConditionExpression=Key("team_name").eq(team_name)
-            )
-        except ClientError as err:
-            logger.error("Couldn't query for comments with %s: %s, %s",
-                         team_name, err.response['Error']['Code'], err.response['Error']['Message'])
-            raise
-        
-        return pd.DataFrame(response["Items"])
+            comments = self.redis_client.zrangebyscore(f'team:{team_name}', start_time, end_time)
+        except redis.exceptions.AuthenticationError:
+            # Reinitialize connection to cache if credentials have expired.
+            self.redis_client = self.create_redis_client()
+            comments = self.redis_client.zrangebyscore(f'team:{team_name}', start_time, end_time)
+        return pd.DataFrame([json.loads(comment) for comment in comments])
+
+
+if __name__ == '__main__':
+    # Test comment querying locally:
+    c = Comment()

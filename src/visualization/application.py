@@ -17,23 +17,6 @@ dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def initialize_dynamodb() -> Comment:
-    """
-    Initializes the DynamoDB resource and checks if the table exists.
-
-    Returns:
-        Comment: An instance of the Comment class.
-    """
-    try:
-        dyn_resource = boto3.resource('dynamodb')
-        comment_table = Comment(dyn_resource=dyn_resource)
-        if not comment_table.exists(os.getenv('DYNAMODB_TABLE_NAME')):
-            raise RuntimeError("DynamoDB table does not exist.")
-        return comment_table
-    except Exception as e:
-        logger.error("Error initializing DynamoDB: %s", e)
-        raise
-
 def create_app() -> Dash:
     """
     Creates a Dash application with the given layout and data source.
@@ -41,7 +24,7 @@ def create_app() -> Dash:
     Returns:
         Dash: A configured Dash application.
     """
-    comment_table = initialize_dynamodb()
+    comment_table = Comment()
     _app = Dash(external_stylesheets=[dbc.themes.LITERA])
     _app.title = 'Realtime Soccer Sentiment'
     _app.layout = create_layout(app=_app, data=comment_table)
@@ -51,7 +34,7 @@ app = create_app()
 application = app.server
 
 if __name__ == '__main__':
-    debug_mode = os.getenv('DEBUG', 'True').lower() == 'true'
+    debug_mode = os.getenv('DEBUG').lower() == 'true'
     host = os.getenv('HOST', 'localhost')
     port = int(os.getenv('PORT', '8050'))
     logger.info("Starting Dash app on %s:%s with debug=%s", host, port, debug_mode)
