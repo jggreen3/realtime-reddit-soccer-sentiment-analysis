@@ -3,6 +3,7 @@ Defines a line plot component showing comment sentiment over time.
 """
 
 import datetime
+import time
 import logging
 from typing import Optional
 import plotly.graph_objects as go
@@ -50,18 +51,19 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
             go.Figure: Updated line plot figure.
         """
         try:
-            df = data.query_comments(team_name=selected_team)
+            start_time = time.mktime((datetime.datetime.now() - pd.to_timedelta(selected_time_window)).timetuple())
+            end_time = time.mktime(datetime.datetime.now().timetuple())
 
+            df = data.query_comments(team_name=selected_team, start_time=start_time, end_time=end_time)
+
+            # Convert timestamps and filter based on the selected time window
             df['date'] = (
-                pd.to_datetime(df['timestamp'].astype(int), unit='s')
+                pd.to_datetime(df['timestamp'].dropna().astype(int), unit='s')
                 .dt.tz_localize('UTC')
                 .dt.tz_convert('US/Pacific')
                 .dt.floor('10Min')
                 .dt.tz_localize(None)
             )
-
-            time_cutoff = datetime.datetime.now() - pd.to_timedelta(selected_time_window)
-            df = df[df['date'] > time_cutoff]
 
             if selected_plot_type == 'individual':
                 df_count = (df.groupby(['date', 'sentiment_id'], as_index=False)['id']

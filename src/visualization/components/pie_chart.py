@@ -3,6 +3,8 @@ Defines a pie chart showing sentiment distribution.
 """
 
 import logging
+import time
+import datetime
 from typing import Optional
 import plotly.graph_objects as go
 import plotly.express as px
@@ -30,9 +32,10 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
     @app.callback(
         Output(ids.PIE_CHART, 'figure'),
         Input(ids.INTERVAL_COMPONENT, 'n_intervals'),
-        Input(ids.TEAM_DROPDOWN, 'value')
+        Input(ids.TEAM_DROPDOWN, 'value'),
+        Input(ids.TIME_WINDOW_BUTTONS, 'value')
     )
-    def update_plot(n: int, selected_team: Optional[str]) -> go.Figure:
+    def update_plot(n: int, selected_team: Optional[str], selected_time_window: str) -> go.Figure:
         """
         Updates the pie chart based on the selected team.
 
@@ -44,7 +47,10 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
             go.Figure: Updated pie chart figure.
         """
         try:
-            df = data.query_comments(team_name=selected_team)
+            start_time = time.mktime((datetime.datetime.now() - pd.to_timedelta(selected_time_window)).timetuple())
+            end_time = time.mktime(datetime.datetime.now().timetuple())
+
+            df = data.query_comments(team_name=selected_team, start_time=start_time, end_time=end_time)
 
             df_plot = pd.DataFrame(df['sentiment_id'].value_counts(normalize=True)).reset_index()
             df_plot.columns = ['sentiment_id', 'proportion']
