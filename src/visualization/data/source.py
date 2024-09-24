@@ -74,7 +74,7 @@ class Comment:
     def create_redis_client(self):
         """Creates a redis client using IAM credentials."""
 
-        if os.getenv('DEBUG').lower() == 'true':
+        if os.getenv('DEBUG') == 'TRUE':
             # Local redis cache
             redis_client = redis.Redis(host='localhost', port=6379)
         else:
