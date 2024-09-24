@@ -34,7 +34,7 @@ app = create_app()
 application = app.server
 
 if __name__ == '__main__':
-    debug_mode = os.getenv('DEBUG').lower() == 'true'
+    debug_mode = os.getenv('DEBUG') == 'TRUE'
     host = os.getenv('HOST', 'localhost')
     port = int(os.getenv('PORT', '8050'))
     logger.info("Starting Dash app on %s:%s with debug=%s", host, port, debug_mode)
