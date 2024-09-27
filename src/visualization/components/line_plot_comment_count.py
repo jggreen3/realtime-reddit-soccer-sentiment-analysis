@@ -49,10 +49,12 @@ def render(app: Dash, data: Comment) -> dcc.Graph:
             go.Figure: Updated line plot figure.
         """
         try:
-            start_time = time.mktime((datetime.datetime.now() - pd.to_timedelta(selected_time_window)).timetuple())
+            start_time = time.mktime((datetime.datetime.now() -
+                                      pd.to_timedelta(selected_time_window)).timetuple())
             end_time = time.mktime(datetime.datetime.now().timetuple())
 
-            df = data.query_comments(team_name=selected_team, start_time=start_time, end_time=end_time)
+            df = data.query_comments(team_name=selected_team, start_time=start_time,
+                                      end_time=end_time)
 
             # Convert timestamps and filter based on the selected time window
             df['date'] = (

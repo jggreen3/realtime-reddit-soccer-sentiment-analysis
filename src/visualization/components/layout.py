@@ -4,7 +4,7 @@ from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from data.source import Comment
 from . import (line_plot, ids, team_dropdown, pie_chart, line_plot_comment_count,
-               time_window_buttons, plot_type_buttons)
+               time_window_buttons, plot_type_buttons, summary_accordion)
 
 
 
@@ -68,7 +68,16 @@ def generate_line_plot(app: Dash, data: Comment) -> html.Div:
                         html.H5('Sentiment Over Time', className='card-title',
                                 style={'font-weight': 'bold'}),
                         html.Hr(),
-                        dbc.Spinner(line_plot.render(app, data))
+                        dbc.Row([
+                            dbc.Col(dbc.Spinner(line_plot.render(app, data)),
+                                    width=8
+                            ),
+                            dbc.Col(
+                                dbc.Spinner(pie_chart.render(app, data)),
+                                width=4
+                            )
+                        ])
+                        
                     ],
                 ),
             )
@@ -125,6 +134,33 @@ def generate_line_plot_comment_count(app: Dash, data: Comment) -> html.Div:
         ]
     )
 
+def generate_summary_accordion(app: Dash, data: Comment) -> html.Div:
+    """
+    Generates a Div component containing an accordion with summarized topics and associated
+    details from recent comments.
+
+    Args:
+        app: Dash appplication
+        data: Comment object encapsulating database interaction methods
+    Returns:
+        html Div: A Div containing the accordion.
+    """
+    return html.Div(
+        children=[
+            dbc.Card(
+                dbc.CardBody(
+                    [
+                        html.H5('Recent Topics of Discussion', className='card-title',
+                                style={'font-weight': 'bold'}),
+                        html.Hr(),
+                        dbc.Spinner(summary_accordion.render(app, data))
+                    ],
+                ),
+            )
+        ]
+    )
+
+
 def create_layout(app: Dash, data: Comment) -> html.Div:
     """
     Generates a Div component containing the layout for a dashboard.
@@ -168,16 +204,22 @@ def create_layout(app: Dash, data: Comment) -> html.Div:
                                              interval=1*10000,
                                              n_intervals=0
                                              ),
-                                generate_line_plot(app, data),
                                 dbc.Row(
                                     [
                                         dbc.Col(
-                                            generate_pie_chart(app, data),
+                                            generate_line_plot(app, data),
+                                            )
+                                    ]
+                                ),
+                                dbc.Row(
+                                    [
+                                        dbc.Col(
+                                            generate_line_plot_comment_count(app, data),
                                             xs=12, md=6,  # Half the width on medium+ screens
                                             style={'padding': '10px'}
                                         ),
                                         dbc.Col(
-                                            generate_line_plot_comment_count(app, data),
+                                            generate_summary_accordion(app, data),
                                             xs=12, md=6,  # Half the width on medium+ screens
                                             style={'padding': '10px'}
                                         )
