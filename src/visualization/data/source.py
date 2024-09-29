@@ -5,6 +5,7 @@ from urllib.parse import ParseResult, urlencode, urlunparse
 from typing import Tuple, Union
 import json
 import os
+import re
 import redis
 import redis.exceptions
 import botocore.session
@@ -109,8 +110,48 @@ class Comment:
             self.redis_client = self.create_redis_client()
             comments = self.redis_client.zrangebyscore(f'team:{team_name}', start_time, end_time)
         return pd.DataFrame([json.loads(comment) for comment in comments])
+    
+
+    def get_most_recent_summary(self, team_name:str) -> pd.DataFrame:
+        """
+        Returns the most recent summary the specified team.
+
+        Args:
+            team_name: The name of the team to query.
+            start_time: The start of the time window to get comments from.
+            end_time: The end of the time window to get comments from.
+        
+        Returns:
+            pd.DataFrame: Dataframe containing the result of the query.
+        """
+        try:
+            summaries = self.redis_client.zrevrangebyscore(f'team_summary:{team_name}', 9027050936,
+                                                           1007052007, withscores=True,
+                                                            start=0, num=3)
+        except redis.exceptions.AuthenticationError:
+            # Reinitialize connection to cache if credentials have expired.
+            self.redis_client = self.create_redis_client()
+            summaries = self.redis_client.zrevrangebyscore(f'team_summary:{team_name}', 9027050936,
+                                                           1007052007, withscores=True,
+                                                            start=0, num=3)
+        df = pd.DataFrame()
+        for summary in summaries:
+            summary_text = summary[0].decode('utf-8')
+
+            # Find all matches (rank, title, description)
+            pattern = r"(\d+)\. \*\*(.*?)\*\* - (.*?)(?=\n\d+\. |\Z)"
+            matches = re.findall(pattern, summary_text, re.DOTALL)
+
+            # Convert the matches into a dataframe
+            _df = pd.DataFrame(matches, columns=['Rank', 'Title', 'Description'])
+            _df['timestamp'] = summary[1]
+            
+            df = pd.concat([df, _df], axis=0)
+
+        return df.reset_index().sort_values(by='timestamp', ascending=False).iloc[0:6]
 
 
 if __name__ == '__main__':
     # Test comment querying locally:
     c = Comment()
+    print(c.get_most_recent_summary(team_name='arsenal'))
