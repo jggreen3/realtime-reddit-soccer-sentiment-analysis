@@ -2,12 +2,8 @@
 Defines a group of summary topics and associated details.
 """
 
-import datetime
-import time
 import logging
 from typing import Optional
-import plotly.graph_objects as go
-import plotly.express as px
 from dash import Dash, dcc, html
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
@@ -37,7 +33,7 @@ def render(app: Dash, data: Comment) -> html.Div:
     def update_plot(n: int, selected_team: Optional[str]) -> html.Div:
         """
         Updates the accordion based on the chosen team.
-        
+
         Args:
             n: Interval count (unused).
             selected_team: The team selected from the dropdown.
@@ -56,8 +52,6 @@ def render(app: Dash, data: Comment) -> html.Div:
                 dbc.AccordionItem(item['Description'], title=item['Title']) 
                 for _, item in df.iterrows()
             ]
-            print(accordion_items)
-
             return dbc.Accordion(accordion_items, start_collapsed=True, flush=True)
 
         except Exception as e:

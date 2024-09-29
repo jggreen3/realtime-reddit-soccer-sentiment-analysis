@@ -70,11 +70,12 @@ def generate_line_plot(app: Dash, data: Comment) -> html.Div:
                         html.Hr(),
                         dbc.Row([
                             dbc.Col(dbc.Spinner(line_plot.render(app, data)),
-                                    width=8
+                                    width=9
                             ),
                             dbc.Col(
                                 dbc.Spinner(pie_chart.render(app, data)),
-                                width=4
+                                width=3,
+
                             )
                         ])
                         
@@ -84,30 +85,6 @@ def generate_line_plot(app: Dash, data: Comment) -> html.Div:
         ]
     )
 
-def generate_pie_chart(app: Dash, data: Comment) -> html.Div:
-    """
-    Generates a Div component containing a pie chart.
-
-    Args:
-        app: Dash appplication
-        data: Comment object encapsulating database interaction methods
-    Returns:
-        html Div: A Div contianing the pie chart
-    """
-    return html.Div(
-        children=[
-            dbc.Card(
-                dbc.CardBody(
-                    [
-                        html.H5('Sentiment Proportion', className='card-title',
-                                style={'font-weight': 'bold'}),
-                        html.Hr(),
-                        dbc.Spinner(pie_chart.render(app, data))
-                    ],
-                ),
-            )
-        ]
-    )
 
 def generate_line_plot_comment_count(app: Dash, data: Comment) -> html.Div:
     """
@@ -156,8 +133,10 @@ def generate_summary_accordion(app: Dash, data: Comment) -> html.Div:
                         dbc.Spinner(summary_accordion.render(app, data))
                     ],
                 ),
+                style={'height': '100%'}
             )
-        ]
+        ],
+        style={'height': '100%'}
     )
 
 
@@ -223,7 +202,8 @@ def create_layout(app: Dash, data: Comment) -> html.Div:
                                             xs=12, md=6,  # Half the width on medium+ screens
                                             style={'padding': '10px'}
                                         )
-                                    ]
+                                    ],
+                                    style={'align-items': 'stretch'}
                                 )
                             ],
                             xs=12, md=8,  # Full width on small screens, 2/3 width on medium+
