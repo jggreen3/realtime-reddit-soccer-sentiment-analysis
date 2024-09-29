@@ -84,7 +84,7 @@ class Comment:
             cache_name = os.getenv('CACHE_NAME')
             elasticache_endpoint = os.getenv('ELASTICACHE_ENDPOINT')
             creds_provider = ElastiCacheIAMProvider(user=username, cache_name=cache_name,
-                                                is_serverless=True)
+                                                is_serverless=False)
 
             redis_client = redis.Redis(host=elasticache_endpoint, port=6379,
                                         credential_provider=creds_provider, ssl=True,
